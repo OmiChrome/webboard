@@ -1,0 +1,23 @@
+{
+  "packageId": "app.bitbench.twa",
+  "host": "bitbench.example.com",
+  "name": "Bitbench — Arduino IDE",
+  "launcherName": "Bitbench",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#0f766e",
+  "navigationColor": "#0b1214",
+  "backgroundColor": "#0b1214",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://bitbench.example.com/icon-512.png",
+  "maskableIconUrl": "https://bitbench.example.com/icon-512.png",
+  "appVersionName": "0.1.0",
+  "appVersionCode": 1,
+  "signingKey": { "path": "./android.keystore", "alias": "bitbench" },
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://bitbench.example.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "minSdkVersion": 23
+}
