@@ -1,11 +1,14 @@
-# Single container: Rust compile server + AVR toolchain + the built PWA.
+# Optional self-hosted image: the static PWA (with in-browser compiler) plus
+# the Rust compile server. GitHub Pages needs none of this.
 FROM node:22-bookworm AS web
+RUN apt-get update && apt-get install -y --no-install-recommends gcc-avr avr-libc binutils-avr && rm -rf /var/lib/apt/lists/*
 WORKDIR /src/web
 RUN corepack enable
 COPY web/package.json web/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY web/ ./
-RUN pnpm build
+COPY examples /src/examples
+RUN pnpm setup && pnpm build
 
 FROM rust:1-bookworm AS server
 WORKDIR /src/server

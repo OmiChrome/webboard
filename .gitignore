@@ -8,3 +8,5 @@ android/*.keystore
 android/app/
 *.apk
 *.aab
+web/public/toolchain/
+web/.toolchain-native/

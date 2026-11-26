@@ -9,17 +9,18 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   fullyParallel: true,
   reporter: [['list']],
-  use: { baseURL: `http://localhost:${PORT}`, trace: 'off', launchOptions: chromium },
+  use: { baseURL: `http://localhost:${PORT}/webboard/`, trace: 'off', launchOptions: chromium },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1400, height: 860 }, launchOptions: chromium }, testIgnore: /mobile\.spec/ },
     { name: 'android', use: { ...devices['Pixel 7'], launchOptions: chromium }, testMatch: /mobile\.spec/ },
   ],
-  // The real Rust compile server, serving the production build of the PWA.
+  // The static production build, served under /webboard/ exactly like GitHub Pages.
+  // Compilation happens in the browser (WebAssembly) — no backend.
   webServer: {
-    command: `cargo run --release --manifest-path ../server/Cargo.toml`,
-    env: { PORT: String(PORT), BITBENCH_STATIC_DIR: 'dist', RUST_LOG: 'warn' },
-    url: `http://localhost:${PORT}/api/health`,
-    timeout: 180_000,
+    command: `pnpm exec vite preview --port ${PORT} --strictPort`,
+    env: { BASE_PATH: '/webboard/' },
+    url: `http://localhost:${PORT}/webboard/`,
+    timeout: 60_000,
     reuseExistingServer: true,
   },
 });

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Editor } from './components/Editor';
 import { BoardPanel } from './components/BoardPanel';
 import { Plotter } from './components/Plotter';
-import { BOARDS, compileSketch, loadExamples, type CompileResult, type Diagnostic, type Example } from './lib/compile';
+import { BOARDS, compileSketch, loadExamples, warmUpCompiler, wasmSupported, serverUrl, type CompileResult, type Diagnostic, type Example, type Progress } from './lib/compile';
 import { parseIntelHex } from './lib/hex';
 import { parsePlotLine } from './lib/plot';
 import { BLANK_SKETCH, loadCurrentId, loadSketches, newId, saveCurrentId, saveSketches, type Sketch } from './lib/storage';
@@ -14,7 +14,7 @@ import { uploadStk500v1 } from './lib/upload/stk500v1';
 import { Icon } from './components/Icon';
 
 type Tab = 'output' | 'monitor' | 'plotter';
-type Busy = null | { kind: 'compile' } | { kind: 'upload'; phase: string; fraction: number };
+type Busy = null | { kind: 'compile'; label: string; fraction?: number } | { kind: 'upload'; phase: string; fraction: number };
 type LogLine = { text: string; tone?: 'error' | 'ok' | 'muted' };
 
 const BAUDS = [9600, 19200, 38400, 57600, 115200];
@@ -214,6 +214,16 @@ export default function App() {
     [portKind, baud, attach, disconnect, appendLog],
   );
 
+  // Fetch the compiler in the background once the page is idle, so the first
+  // Verify/Upload is fast. Cached by the service worker afterwards (offline OK).
+  useEffect(() => {
+    if (!wasmSupported() || serverUrl()) return;
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+    const start = () => void warmUpCompiler().catch(() => {});
+    const t = idle ? setTimeout(() => idle(start), 2500) : setTimeout(start, 2500);
+    return () => clearTimeout(t);
+  }, []);
+
   // Auto-connect the virtual board on first load so the demo just works.
   useEffect(() => {
     void connect('virtual');
@@ -224,16 +234,31 @@ export default function App() {
   // ---- build & upload --------------------------------------------------------
   const verify = useCallback(async (): Promise<CompileResult | null> => {
     if (!current) return null;
-    setBusy({ kind: 'compile' });
+    setBusy({ kind: 'compile', label: 'Compiling…' });
     setTab('output');
     appendLog(`Compiling ${current.name}.ino for ${board.name}…`, 'muted');
     const t0 = performance.now();
     try {
-      const res = await compileSketch(board.id, current.source);
+      let announced = false;
+      const res = await compileSketch(board.id, current.source, {
+        onProgress: (p: Progress) => {
+          if (p.stage === 'download') {
+            if (!announced) {
+              announced = true;
+              appendLog(`Downloading the in-browser compiler (${((p.total ?? 0) / 1e6).toFixed(1)} MB, first time only)…`, 'muted');
+            }
+            setBusy({ kind: 'compile', label: `Downloading compiler ${((p.loaded ?? 0) / 1e6).toFixed(1)} / ${((p.total ?? 0) / 1e6).toFixed(1)} MB`, fraction: (p.loaded ?? 0) / (p.total || 1) });
+          } else {
+            const labels = { compile: 'Compiling…', assemble: 'Assembling…', link: 'Linking…', hex: 'Writing HEX…' } as const;
+            setBusy({ kind: 'compile', label: labels[p.stage], fraction: { compile: 0.25, assemble: 0.6, link: 0.75, hex: 0.9 }[p.stage] });
+          }
+        },
+      });
       setDiagnostics(res.diagnostics ?? []);
       appendLog(res.log.trimEnd(), res.ok ? undefined : 'error');
       if (res.ok) {
-        appendLog(`Done compiling in ${Math.round(performance.now() - t0)} ms${res.cached ? ' (cached)' : ''}.`, 'ok');
+        const where = res.source === 'wasm' ? 'in your browser' : res.source === 'server' ? 'on the server' : 'from the precompiled example';
+        appendLog(`Done compiling ${where} in ${Math.round(performance.now() - t0)} ms${res.cached ? ' (cached)' : ''}.`, 'ok');
         setLastBuild(res);
         builtFor.current = { source: current.source, board: board.id };
       } else {
@@ -365,8 +390,8 @@ export default function App() {
         </div>
         {busy && (
           <div className="progress" role="status" aria-live="polite">
-            {busy.kind === 'compile' ? 'Compiling…' : `${busy.phase} ${Math.round(busy.fraction * 100)}%`}
-            <span className="bar" style={{ '--p': busy.kind === 'upload' ? busy.fraction : 0.4 } as React.CSSProperties} />
+            <span className="progress-label">{busy.kind === 'compile' ? busy.label : `Uploading: ${busy.phase} ${Math.round(busy.fraction * 100)}%`}</span>
+            <span className="bar" style={{ '--p': busy.fraction ?? 0.3 } as React.CSSProperties} />
           </div>
         )}
       </header>
@@ -412,9 +437,9 @@ export default function App() {
         <details className="side-section settings">
           <summary>Settings &amp; device support</summary>
           <label>
-            Compile server URL
+            Compile server URL (optional)
             <input
-              placeholder="same origin"
+              placeholder="blank = compile in this browser"
               defaultValue={(() => {
                 try {
                   return localStorage.getItem('bitbench.server') ?? '';
@@ -434,6 +459,7 @@ export default function App() {
           <ul className="caps">
             <li className={WebSerialTransport.isSupported() ? 'yes' : 'no'}>Web Serial</li>
             <li className={WebUsbSerial.isSupported() ? 'yes' : 'no'}>WebUSB</li>
+            <li className={wasmSupported() ? 'yes' : 'no'}>WASM compiler</li>
             <li className={'serviceWorker' in navigator ? 'yes' : 'no'}>Offline (PWA)</li>
           </ul>
         </details>

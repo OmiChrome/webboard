@@ -556,7 +556,18 @@ h2 {
   right: 0;
   bottom: -1px;
   height: 0;
-  font-size: 0;
+}
+.progress-label {
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--surface);
+  padding: 1px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
 }
 .progress .bar {
   position: absolute;

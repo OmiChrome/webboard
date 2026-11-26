@@ -1,6 +1,6 @@
 // Captures README screenshots from a running server (default http://localhost:8799).
 import { chromium, devices } from '@playwright/test';
-const base = process.env.BASE_URL || 'http://localhost:8799';
+const base = process.env.BASE_URL || 'http://localhost:8799/webboard/';
 const out = new URL('../../docs/screenshots/', import.meta.url).pathname;
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 
@@ -8,6 +8,7 @@ async function shot(ctxOpts, name, steps) {
   const ctx = await browser.newContext(ctxOpts);
   const page = await ctx.newPage();
   await page.goto(base);
+  await page.waitForTimeout(100);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await steps(page);
@@ -29,7 +30,10 @@ for (const scheme of ['light', 'dark']) {
   });
 }
 await shot({ viewport: { width: 1400, height: 860 }, deviceScaleFactor: 2, colorScheme: 'light' }, 'desktop-traffic-output', async (page) => {
-  await upload(page, 'TrafficLight');
+  await upload(page, 'SerialCommands');
+  await page.getByTestId('example-TrafficLight').click();
+  await page.getByTestId('upload').click();
+  await page.getByTestId('log').getByText('Upload complete').nth(1).waitFor();
   await page.waitForTimeout(400);
 });
 await shot({ viewport: { width: 1400, height: 860 }, deviceScaleFactor: 2, colorScheme: 'dark' }, 'desktop-monitor', async (page) => {

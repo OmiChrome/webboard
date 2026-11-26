@@ -62,6 +62,16 @@ describe('STK500v1 upload to the virtual Uno', () => {
     await until(() => text.includes('HI UNO'));
   });
 
+  it('runs SerialCommands (String parsing, full Arduino core)', async () => {
+    const b = board();
+    let text = '';
+    await uploadStk500v1(b, hexOf('SerialCommands'), { baudRate: 115200 });
+    b.subscribe((d) => (text += new TextDecoder().decode(d)));
+    await until(() => text.includes('Commands:'));
+    await b.write(new TextEncoder().encode('Blink 2\n'));
+    await until(() => text.includes('Blinked 2 times (total 2)'));
+  });
+
   it('produces PWM on pin 9 for Fade', async () => {
     const b = board();
     await uploadStk500v1(b, hexOf('Fade'), { baudRate: 115200 });

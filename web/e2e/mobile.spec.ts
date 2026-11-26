@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('phone layout: upload Knight Rider from the drawer', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.getByRole('button', { name: 'Sketches' }).click();

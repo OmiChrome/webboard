@@ -1,9 +1,74 @@
 [
-  { "id": "Blink", "title": "Blink", "summary": "Blink the on-board LED on pin 13.", "tags": ["basics", "gpio"] },
-  { "id": "HelloSerial", "title": "Hello Serial", "summary": "Print a greeting and counter to the Serial Monitor.", "tags": ["basics", "serial"] },
-  { "id": "Fade", "title": "Fade", "summary": "Ramp LED brightness on pin 9 with PWM.", "tags": ["analog", "pwm"] },
-  { "id": "SinePlotter", "title": "Sine Plotter", "summary": "Stream sin/cos values to the Serial Plotter.", "tags": ["serial", "plotter"] },
-  { "id": "EchoUppercase", "title": "Echo Uppercase", "summary": "Echo serial input back in uppercase.", "tags": ["serial", "input"] },
-  { "id": "TrafficLight", "title": "Traffic Light", "summary": "Three-LED state machine on pins 10–12.", "tags": ["gpio", "state machine"] },
-  { "id": "KnightRider", "title": "Knight Rider", "summary": "Scanning light across pins 2–8.", "tags": ["gpio", "loops"] }
+  {
+    "id": "Blink",
+    "title": "Blink",
+    "summary": "Blink the on-board LED on pin 13.",
+    "tags": [
+      "basics",
+      "gpio"
+    ]
+  },
+  {
+    "id": "HelloSerial",
+    "title": "Hello Serial",
+    "summary": "Print a greeting and counter to the Serial Monitor.",
+    "tags": [
+      "basics",
+      "serial"
+    ]
+  },
+  {
+    "id": "Fade",
+    "title": "Fade",
+    "summary": "Ramp LED brightness on pin 9 with PWM.",
+    "tags": [
+      "analog",
+      "pwm"
+    ]
+  },
+  {
+    "id": "SinePlotter",
+    "title": "Sine Plotter",
+    "summary": "Stream sin/cos values to the Serial Plotter.",
+    "tags": [
+      "serial",
+      "plotter"
+    ]
+  },
+  {
+    "id": "EchoUppercase",
+    "title": "Echo Uppercase",
+    "summary": "Echo serial input back in uppercase.",
+    "tags": [
+      "serial",
+      "input"
+    ]
+  },
+  {
+    "id": "SerialCommands",
+    "title": "Serial Commands",
+    "summary": "Type on/off/blink 3 to control the LED (uses String).",
+    "tags": [
+      "serial",
+      "String"
+    ]
+  },
+  {
+    "id": "TrafficLight",
+    "title": "Traffic Light",
+    "summary": "Three-LED state machine on pins 10\u201312.",
+    "tags": [
+      "gpio",
+      "state machine"
+    ]
+  },
+  {
+    "id": "KnightRider",
+    "title": "Knight Rider",
+    "summary": "Scanning light across pins 2\u20138.",
+    "tags": [
+      "gpio",
+      "loops"
+    ]
+  }
 ]

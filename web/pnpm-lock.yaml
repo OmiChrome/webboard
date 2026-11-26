@@ -42,6 +42,9 @@ importers:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
+      '@horang-corp/avr-gcc-wasm':
+        specifier: 0.2.0
+        version: 0.2.0
       '@playwright/test':
         specifier: ^1.65.1
         version: 1.65.1
@@ -626,6 +629,10 @@ packages:
 
   '@emnapi/wasi-threads@2.2.0':
     resolution: {integrity: sha512-JP7OYH38Q7+pyTAe14raZHLQIK7BDKbdwji+Xi3pcd/6QkJYQH3SX4wu6EplGrGJWRepoNzedfm0G3B9Z4e9Rw==}
+
+  '@horang-corp/avr-gcc-wasm@0.2.0':
+    resolution: {integrity: sha512-N7evT4c8E/9sIKVk0VbC8V+i9UTubHgY5Frxh6LB+OR8BytXmU1cE20poIY0ndj7FwqUPzy1SQfBOAWUDNyU4A==}
+    engines: {node: '>=18'}
 
   '@isaacs/cliui@9.0.0':
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
@@ -3147,6 +3154,8 @@ snapshots:
     dependencies:
       tslib: 2.9.1
     optional: true
+
+  '@horang-corp/avr-gcc-wasm@0.2.0': {}
 
   '@isaacs/cliui@9.0.0': {}
 
