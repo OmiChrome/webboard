@@ -110,6 +110,15 @@ test('falls back to the precompiled example when the compiler cannot load', asyn
   await expect(page.getByTestId('led-10')).toHaveAttribute('data-on', '1');
 });
 
+test('missing setup()/loop() gives a friendly hint', async ({ page }) => {
+  await fresh(page);
+  await page.getByRole('button', { name: 'New sketch' }).click();
+  await setEditor(page, 'int counter = 0;\n');
+  await page.getByRole('button', { name: 'Verify' }).click();
+  await expect(page.getByTestId('log')).toContainText('hint: Every sketch needs a `void setup()` function.', { timeout: 60_000 });
+  await expect(page.getByTestId('log')).toContainText('hint: Every sketch needs a `void loop()` function.');
+});
+
 test('sketches persist on the device', async ({ page }) => {
   await fresh(page);
   await openExample(page, 'Fade');

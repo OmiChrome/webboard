@@ -203,7 +203,7 @@ impl Toolchain {
         }
 
         let args: Vec<String> = vec![
-            "-Os".into(), "-Wl,--gc-sections".into(), format!("-mmcu={}", b.mcu),
+            "-Os".into(), "-Wl,--gc-sections".into(), "-Wl,--demangle".into(), format!("-mmcu={}", b.mcu),
             "sketch.o".into(), lib.display().to_string(), "-lm".into(), "-o".into(), "sketch.elf".into(),
         ];
         let (ok, log) = self.run("avr-gcc", &args, dir).await?;
@@ -211,8 +211,12 @@ impl Toolchain {
         result.log.push_str(&log);
         if !ok {
             result.diagnostics.extend(parse_diagnostics(&log));
-            for (sym, hint) in [("setup()", "Every sketch needs a `void setup()` function."), ("loop()", "Every sketch needs a `void loop()` function.")] {
-                if log.contains(&format!("undefined reference to `{sym}'")) {
+            // Newer binutils print mangled names (`_Z5setupv`) unless asked to demangle.
+            for (sym, mangled, hint) in [
+                ("setup()", "_Z5setupv", "Every sketch needs a `void setup()` function."),
+                ("loop()", "_Z4loopv", "Every sketch needs a `void loop()` function."),
+            ] {
+                if log.contains(&format!("undefined reference to `{sym}'")) || log.contains(&format!("undefined reference to `{mangled}'")) {
                     result.log.push_str(&format!("hint: {hint}\n"));
                     result.diagnostics.push(Diagnostic { line: 1, column: 1, severity: "error".into(), message: hint.into() });
                 }
@@ -256,6 +260,9 @@ impl Toolchain {
             let end = out[i + root.len()..].find('/').map(|j| i + root.len() + j + 1).unwrap_or(out.len());
             out.replace_range(i..end, "");
         }
+        // Drop the linker's install path, e.g. "/usr/lib/gcc/avr/14.3.0/../../../avr/bin/ld: ".
+        static LD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^\S*/bin/ld: ").unwrap());
+        let out = LD.replace_all(&out, "ld: ").into_owned();
         out.replace("sketch.ino.cpp", "sketch.ino")
     }
 }

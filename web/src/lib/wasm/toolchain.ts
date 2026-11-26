@@ -151,6 +151,7 @@ export class WasmToolchain {
     const factory = this.factories.get(tool)!;
     const mod = await factory({
       noInitialRun: true,
+      thisProgram: tool,
       print: (l: string) => l && log.push(l),
       printErr: (l: string) => l && log.push(l),
       instantiateWasm(imports: WebAssembly.Imports, receive: (i: WebAssembly.Instance, m: WebAssembly.Module) => void) {
@@ -238,8 +239,10 @@ export class WasmToolchain {
     );
     t('linkMs', t0);
     if (!elf) {
+      const mangled: Record<string, string> = { setup: '_Z5setupv', loop: '_Z4loopv' };
       for (const sym of ['setup', 'loop']) {
-        if (log.some((l) => l.includes(`undefined reference to \`${sym}'`))) {
+        const forms = [`${sym}'`, `${sym}()'`, `${mangled[sym]}'`].map((f) => `undefined reference to \`${f}`);
+        if (log.some((l) => forms.some((f) => l.includes(f)))) {
           log.push(`hint: Every sketch needs a \`void ${sym}()\` function.`);
         }
       }

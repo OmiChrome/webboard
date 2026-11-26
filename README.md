@@ -87,9 +87,9 @@ cd server && cargo test
 ```
 
 - `pnpm test`: 28 unit tests. Intel HEX, sketch preprocessing, the toolchain pack, the USB-serial drivers against a fake USB device, and STK500 upload into the virtual Uno with the firmware then running.
-- `pnpm e2e`: 9 Playwright tests against the **static** build served under `/webboard/`, like Pages. They cover:
+- `pnpm e2e`: 10 Playwright tests against the **static** build served under `/webboard/`, like Pages. They cover:
   - in-browser compiling of edited sketches;
-  - inline compiler errors;
+  - inline compiler errors and the missing `setup()`/`loop()` hint;
   - upload, serial I/O and the plotter;
   - falling back to precompiled examples;
   - saving sketches on the device;
